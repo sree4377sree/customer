@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: layout(~{::title}, ~{::#main-content})}">
+<head>
+    <title>Add Support Agent - Customer Support System</title>
+</head>
+<body>
+<div id="main-content">
+
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 small">
+                    <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/employees}">Support Team</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Add Agent</li>
+                </ol>
+            </nav>
+            <h2 class="h3 fw-bold mb-0">Register New Support Agent</h2>
+        </div>
+        <a th:href="@{/employees}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Back to Team
+        </a>
+    </div>
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-md-8 col-lg-6">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-person-plus text-primary me-2"></i>Agent Details</h6>
+                </div>
+                <div class="card-body p-4">
+                    <form th:action="@{/employees/new}" th:object="${employee}" method="post">
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" th:field="*{fullName}" class="form-control" th:errorclass="is-invalid" placeholder="e.g. Alex Morgan">
+                            <div class="invalid-feedback" th:errors="*{fullName}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Email Address <span class="text-danger">*</span></label>
+                            <input type="email" th:field="*{email}" class="form-control" th:errorclass="is-invalid" placeholder="e.g. alex.morgan@supportdesk.internal">
+                            <div class="invalid-feedback" th:errors="*{email}"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Role / Title</label>
+                            <input type="text" th:field="*{role}" class="form-control" placeholder="e.g. Senior Support Engineer">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Department</label>
+                            <input type="text" th:field="*{department}" class="form-control" placeholder="e.g. Tier-2 Technical Support">
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">Contact Phone</label>
+                            <input type="tel" th:field="*{phone}" class="form-control" placeholder="+1 (555) 019-2834">
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a th:href="@{/employees}" class="btn btn-outline-secondary px-4">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4 shadow-sm">Save Agent</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

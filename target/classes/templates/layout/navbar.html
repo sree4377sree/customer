@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm main-navbar">
+    <div class="container-fluid px-4">
+        <a class="navbar-brand d-flex align-items-center gap-2 fw-bold" th:href="@{/dashboard}">
+            <div class="brand-icon bg-primary text-white rounded-3 p-2 d-flex align-items-center justify-content-center shadow-sm">
+                <i class="bi bi-headset fs-5"></i>
+            </div>
+            <span>SupportDesk<span class="text-primary">Pro</span></span>
+        </a>
+
+        <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+                aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0 ms-lg-3 gap-1">
+                <li class="nav-item">
+                    <a class="nav-link px-3" th:classappend="${activeNav == 'dashboard'} ? 'active' : ''" th:href="@{/dashboard}">
+                        <i class="bi bi-speedometer2 me-1"></i> Dashboard
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link px-3" th:classappend="${activeNav == 'tickets'} ? 'active' : ''" th:href="@{/tickets}">
+                        <i class="bi bi-ticket-detailed me-1"></i> Tickets
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link px-3" th:classappend="${activeNav == 'new-ticket'} ? 'active' : ''" th:href="@{/tickets/new}">
+                        <i class="bi bi-plus-circle me-1"></i> Create Ticket
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link px-3" th:classappend="${activeNav == 'employees'} ? 'active' : ''" th:href="@{/employees}">
+                        <i class="bi bi-people me-1"></i> Support Team
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link px-3" th:classappend="${activeNav == 'track'} ? 'active' : ''" th:href="@{/track}">
+                        <i class="bi bi-search me-1"></i> Track Ticket
+                    </a>
+                </li>
+            </ul>
+
+            <!-- Quick Track Search Form -->
+            <form class="d-flex align-items-center my-2 my-lg-0 me-3" th:action="@{/track}" method="get">
+                <div class="input-group input-group-sm">
+                    <input class="form-control bg-dark text-light border-secondary" type="search" name="query"
+                           placeholder="Track Ticket ID..." aria-label="Search" style="width: 170px;">
+                    <button class="btn btn-outline-primary" type="submit">
+                        <i class="bi bi-arrow-right"></i>
+                    </button>
+                </div>
+            </form>
+
+            <div class="d-flex align-items-center gap-2">
+                <a th:href="@{/tickets/new}" class="btn btn-primary btn-sm px-3 shadow-sm d-flex align-items-center gap-1">
+                    <i class="bi bi-plus-lg"></i>
+                    <span>New Ticket</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+</body>
+</html>

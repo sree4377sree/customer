@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: layout(~{::title}, ~{::#main-content})}">
+<head>
+    <title th:text="'Ticket ' + ${ticket.ticketId} + ' - Details'">Ticket Details</title>
+</head>
+<body>
+<div id="main-content">
+
+    <!-- Header & Action Bar -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 small">
+                    <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/tickets}">Tickets</a></li>
+                    <li class="breadcrumb-item active" aria-current="page" th:text="${ticket.ticketId}">TKT-1001</li>
+                </ol>
+            </nav>
+            <div class="d-flex align-items-center gap-2 flex-wrap">
+                <h2 class="h3 fw-bold mb-0" th:text="${ticket.ticketId}">TKT-1001</h2>
+                <span class="badge" th:classappend="${ticket.status.badgeClass}" th:text="${ticket.status.displayName}">Open</span>
+                <span class="badge" th:classappend="${ticket.priority.badgeClass}" th:text="${ticket.priority.displayName} + ' Priority'">Medium</span>
+                <span class="badge bg-light text-dark border" th:text="${ticket.category.displayName}">Technical</span>
+            </div>
+        </div>
+
+        <!-- Quick Action Modals Triggers -->
+        <div class="d-flex flex-wrap gap-2">
+            <!-- Update Status Modal Button -->
+            <button type="button" class="btn btn-outline-primary btn-sm d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#statusModal">
+                <i class="bi bi-arrow-repeat"></i>
+                <span>Update Status</span>
+            </button>
+
+            <!-- Assign Agent Modal Button -->
+            <button type="button" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#assignModal">
+                <i class="bi bi-person-check"></i>
+                <span>Assign Agent</span>
+            </button>
+
+            <!-- Change Priority Modal Button -->
+            <button type="button" class="btn btn-outline-secondary btn-sm d-flex align-items-center gap-1" data-bs-toggle="modal" data-bs-target="#priorityModal">
+                <i class="bi bi-flag"></i>
+                <span>Change Priority</span>
+            </button>
+
+            <!-- Edit Button -->
+            <a th:href="@{'/tickets/' + ${ticket.id} + '/edit'}" class="btn btn-warning btn-sm d-flex align-items-center gap-1">
+                <i class="bi bi-pencil"></i>
+                <span>Edit</span>
+            </a>
+
+            <!-- Delete Button -->
+            <form th:action="@{'/tickets/' + ${ticket.id} + '/delete'}" method="post" onsubmit="return confirm('Are you sure you want to permanently delete this ticket?');">
+                <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete Ticket">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Content Details Grid -->
+    <div class="row g-4 mb-4">
+        
+        <!-- Left: Issue Details & Resolution -->
+        <div class="col-12 col-lg-8">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h5 class="mb-0 fw-bold" th:text="${ticket.title}">Subject / Title</h5>
+                </div>
+                <div class="card-body p-4">
+                    <h6 class="text-muted fw-semibold small text-uppercase mb-2">Issue Description</h6>
+                    <div class="p-3 bg-light rounded-3 text-secondary lh-lg mb-4" style="white-space: pre-wrap;" th:text="${ticket.description}">
+                        Detailed description text here...
+                    </div>
+
+                    <!-- Resolution Notes if any -->
+                    <div th:if="${ticket.resolutionNotes != null and !ticket.resolutionNotes.isBlank()}" class="alert alert-success border-0 shadow-sm">
+                        <div class="d-flex align-items-center gap-2 fw-bold mb-1">
+                            <i class="bi bi-check-circle-fill"></i>
+                            <span>Resolution Details</span>
+                        </div>
+                        <p class="mb-0 small text-secondary" style="white-space: pre-wrap;" th:text="${ticket.resolutionNotes}"></p>
+                        <div th:if="${ticket.resolvedAt != null}" class="text-muted small mt-2">
+                            Resolved on <span th:text="${#temporals.format(ticket.resolvedAt, 'dd MMM yyyy, HH:mm')}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Activity Audit Trail / History Timeline -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-clock-history text-primary me-2"></i>Activity &amp; Audit Trail</h6>
+                </div>
+                <div class="card-body p-4">
+                    <ul class="timeline">
+                        <li class="timeline-item" th:each="act : ${ticket.activities}">
+                            <div class="timeline-marker"
+                                 th:classappend="${act.action == 'CREATED' ? 'success' : (act.action == 'STATUS_CHANGED' ? 'danger' : '')}"></div>
+                            <div class="d-flex justify-content-between align-items-baseline">
+                                <span class="fw-bold text-dark small" th:text="${act.action}">ACTION</span>
+                                <span class="text-muted small" th:text="${#temporals.format(act.timestamp, 'dd MMM yyyy, HH:mm')}">Time</span>
+                            </div>
+                            <p class="mb-1 text-secondary small" th:text="${act.description}">Description</p>
+                            <span class="text-muted small fst-italic">By: <span th:text="${act.performedBy}">Author</span></span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Metadata & Customer Card -->
+        <div class="col-12 col-lg-4">
+            
+            <!-- Assigned Support Employee Card -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-person-badge text-primary me-2"></i>Assigned Support Agent</h6>
+                </div>
+                <div class="card-body p-3">
+                    <div th:if="${ticket.assignedTo != null}" class="d-flex align-items-center gap-3">
+                        <div class="rounded-circle bg-primary-subtle text-primary p-3 d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
+                            <i class="bi bi-person-fill fs-5"></i>
+                        </div>
+                        <div>
+                            <div class="fw-bold text-dark" th:text="${ticket.assignedTo.fullName}">Sarah Connor</div>
+                            <small class="text-muted d-block" th:text="${ticket.assignedTo.role} + ' &bull; ' + ${ticket.assignedTo.department}">Role</small>
+                            <small class="text-muted d-block"><i class="bi bi-envelope me-1"></i><span th:text="${ticket.assignedTo.email}">email</span></small>
+                        </div>
+                    </div>
+                    <div th:unless="${ticket.assignedTo != null}" class="text-center py-3 text-muted">
+                        <i class="bi bi-person-dash fs-3 d-block text-secondary mb-1"></i>
+                        <span>No agent assigned currently.</span>
+                        <div class="mt-2">
+                            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#assignModal">Assign Now</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Details Card -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-person text-info me-2"></i>Customer Information</h6>
+                </div>
+                <div class="card-body p-3">
+                    <div class="mb-2">
+                        <small class="text-muted d-block fw-semibold">Customer Name</small>
+                        <div class="fw-bold text-dark" th:text="${ticket.customer.name}">Alice Walker</div>
+                    </div>
+                    <div class="mb-2">
+                        <small class="text-muted d-block fw-semibold">Email</small>
+                        <div>
+                            <a th:href="'mailto:' + ${ticket.customer.email}" class="text-decoration-none" th:text="${ticket.customer.email}">alice@acme.com</a>
+                        </div>
+                    </div>
+                    <div class="mb-2" th:if="${ticket.customer.phone != null and !ticket.customer.phone.isBlank()}">
+                        <small class="text-muted d-block fw-semibold">Phone</small>
+                        <div th:text="${ticket.customer.phone}">+1 555-1234</div>
+                    </div>
+                    <div class="mb-0" th:if="${ticket.customer.companyOrDept != null and !ticket.customer.companyOrDept.isBlank()}">
+                        <small class="text-muted d-block fw-semibold">Organization / Dept</small>
+                        <div th:text="${ticket.customer.companyOrDept}">Acme Industries</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Ticket Meta Info Card -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-info-circle text-secondary me-2"></i>Ticket Metadata</h6>
+                </div>
+                <div class="card-body p-3 small text-secondary">
+                    <div class="d-flex justify-content-between py-1 border-bottom">
+                        <span>Created:</span>
+                        <strong th:text="${#temporals.format(ticket.createdAt, 'dd MMM yyyy, HH:mm')}"></strong>
+                    </div>
+                    <div class="d-flex justify-content-between py-1 border-bottom">
+                        <span>Last Updated:</span>
+                        <strong th:text="${#temporals.format(ticket.updatedAt, 'dd MMM yyyy, HH:mm')}"></strong>
+                    </div>
+                    <div class="d-flex justify-content-between py-1" th:if="${ticket.resolvedAt != null}">
+                        <span>Resolved:</span>
+                        <strong class="text-success" th:text="${#temporals.format(ticket.resolvedAt, 'dd MMM yyyy, HH:mm')}"></strong>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- MODAL 1: Update Status -->
+    <div class="modal fade" id="statusModal" tabindex="-1" aria-labelledby="statusModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{'/tickets/' + ${ticket.id} + '/status'}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold" id="statusModalLabel">Update Ticket Status</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">New Status</label>
+                            <select name="status" class="form-select">
+                                <option th:each="st : ${allStatuses}" th:value="${st}" th:text="${st.displayName}"
+                                        th:selected="${ticket.status == st}"></option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Resolution Notes (Optional)</label>
+                            <textarea name="resolutionNotes" rows="4" class="form-control"
+                                      placeholder="Explain root cause and resolution steps (required when resolving)..."
+                                      th:text="${ticket.resolutionNotes}"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Status</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 2: Assign Employee -->
+    <div class="modal fade" id="assignModal" tabindex="-1" aria-labelledby="assignModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{'/tickets/' + ${ticket.id} + '/assign'}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold" id="assignModalLabel">Assign Support Agent</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Select Agent</label>
+                            <select name="employeeId" class="form-select">
+                                <option value="">-- Unassigned --</option>
+                                <option th:each="emp : ${employees}" th:value="${emp.id}"
+                                        th:text="${emp.fullName} + ' (' + ${emp.role} + ' - ' + ${emp.department} + ')'"
+                                        th:selected="${ticket.assignedTo != null and ticket.assignedTo.id == emp.id}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Update Assignment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL 3: Update Priority -->
+    <div class="modal fade" id="priorityModal" tabindex="-1" aria-labelledby="priorityModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{'/tickets/' + ${ticket.id} + '/priority'}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title fw-bold" id="priorityModalLabel">Set Priority Level</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Priority</label>
+                            <select name="priority" class="form-select">
+                                <option th:each="pr : ${allPriorities}" th:value="${pr}" th:text="${pr.displayName}"
+                                        th:selected="${ticket.priority == pr}"></option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Priority</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: layout(~{::title}, ~{::#main-content})}">
+<head>
+    <title th:text="'Tracking: ' + ${ticket.ticketId}">Ticket Tracking Status</title>
+</head>
+<body>
+<div id="main-content">
+
+    <div class="row justify-content-center">
+        <div class="col-12 col-lg-9">
+            
+            <!-- Breadcrumb & Back -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb mb-0 small">
+                        <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a th:href="@{/track}">Track Ticket</a></li>
+                        <li class="breadcrumb-item active" aria-current="page" th:text="${ticket.ticketId}">TKT-1001</li>
+                    </ol>
+                </nav>
+                <a th:href="@{/track}" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-search me-1"></i> Track Another Ticket
+                </a>
+            </div>
+
+            <!-- Main Tracking Card -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Tracking Information</span>
+                        <h4 class="mb-0 fw-bold">Ticket <span class="text-primary" th:text="${ticket.ticketId}">TKT-1001</span></h4>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge fs-6" th:classappend="${ticket.status.badgeClass}" th:text="${ticket.status.displayName}">In Progress</span>
+                        <span class="badge" th:classappend="${ticket.priority.badgeClass}" th:text="${ticket.priority.displayName} + ' Priority'">High</span>
+                    </div>
+                </div>
+
+                <div class="card-body p-4">
+
+                    <!-- Visual Step Progress Stepper -->
+                    <div class="tracking-steps mb-5 mt-2">
+                        <!-- Step 1: Created -->
+                        <div class="step-node completed">
+                            <div class="step-circle"><i class="bi bi-file-earmark-check-fill"></i></div>
+                            <div class="step-label">Submitted</div>
+                            <small class="text-muted" th:text="${#temporals.format(ticket.createdAt, 'dd MMM, HH:mm')}"></small>
+                        </div>
+
+                        <!-- Step 2: Assigned -->
+                        <div class="step-node"
+                             th:classappend="${ticket.assignedTo != null ? 'completed' : 'active'}">
+                            <div class="step-circle"><i class="bi bi-person-check-fill"></i></div>
+                            <div class="step-label">Assigned</div>
+                            <small class="text-muted" th:if="${ticket.assignedTo != null}" th:text="${ticket.assignedTo.fullName}"></small>
+                            <small class="text-muted" th:unless="${ticket.assignedTo != null}">Pending</small>
+                        </div>
+
+                        <!-- Step 3: In Progress -->
+                        <div class="step-node"
+                             th:classappend="${ticket.status.name() == 'IN_PROGRESS' ? 'active' : (ticket.status.name() == 'RESOLVED' or ticket.status.name() == 'CLOSED' ? 'completed' : '')}">
+                            <div class="step-circle"><i class="bi bi-gear-fill"></i></div>
+                            <div class="step-label">In Progress</div>
+                            <small class="text-muted" th:text="${ticket.status.name() == 'IN_PROGRESS' ? 'Active Work' : ''}"></small>
+                        </div>
+
+                        <!-- Step 4: Resolved -->
+                        <div class="step-node"
+                             th:classappend="${ticket.status.name() == 'RESOLVED' or ticket.status.name() == 'CLOSED' ? 'completed' : ''}">
+                            <div class="step-circle"><i class="bi bi-check-lg"></i></div>
+                            <div class="step-label">Resolved</div>
+                            <small class="text-muted" th:if="${ticket.resolvedAt != null}" th:text="${#temporals.format(ticket.resolvedAt, 'dd MMM, HH:mm')}"></small>
+                            <small class="text-muted" th:unless="${ticket.resolvedAt != null}">Pending</small>
+                        </div>
+                    </div>
+
+                    <!-- Ticket Subject & Details -->
+                    <div class="mb-4">
+                        <h5 class="fw-bold mb-2" th:text="${ticket.title}">Ticket Title</h5>
+                        <div class="text-muted small mb-3">
+                            <span class="me-3"><i class="bi bi-tag-fill me-1 text-primary"></i> Category: <strong class="text-dark" th:text="${ticket.category.displayName}">Technical Issue</strong></span>
+                            <span><i class="bi bi-calendar3 me-1 text-primary"></i> Opened: <strong class="text-dark" th:text="${#temporals.format(ticket.createdAt, 'dd MMMM yyyy, HH:mm')}">Date</strong></span>
+                        </div>
+                        <div class="p-3 bg-light rounded-3 text-secondary lh-lg" style="white-space: pre-wrap;" th:text="${ticket.description}">Description text</div>
+                    </div>
+
+                    <!-- Resolution Alert -->
+                    <div th:if="${ticket.resolutionNotes != null and !ticket.resolutionNotes.isBlank()}" class="alert alert-success border-0 shadow-sm mb-4">
+                        <div class="d-flex align-items-center gap-2 fw-bold mb-2">
+                            <i class="bi bi-patch-check-fill fs-5"></i>
+                            <span>Resolution Summary</span>
+                        </div>
+                        <p class="mb-0 text-secondary" style="white-space: pre-wrap;" th:text="${ticket.resolutionNotes}"></p>
+                    </div>
+
+                    <!-- Customer & Support Agent Info row -->
+                    <div class="row g-3 p-3 bg-light rounded-3">
+                        <div class="col-12 col-md-6 border-end-md">
+                            <div class="text-muted small fw-semibold text-uppercase mb-1">Customer Information</div>
+                            <div class="fw-bold" th:text="${ticket.customer.name}">Customer Name</div>
+                            <div class="small text-secondary" th:text="${ticket.customer.email}">customer@domain.com</div>
+                            <div class="small text-secondary" th:if="${ticket.customer.companyOrDept != null}" th:text="${ticket.customer.companyOrDept}">Company</div>
+                        </div>
+                        <div class="col-12 col-md-6">
+                            <div class="text-muted small fw-semibold text-uppercase mb-1">Assigned Support Specialist</div>
+                            <div th:if="${ticket.assignedTo != null}">
+                                <div class="fw-bold text-dark" th:text="${ticket.assignedTo.fullName}">Agent Name</div>
+                                <div class="small text-secondary" th:text="${ticket.assignedTo.role} + ' &bull; ' + ${ticket.assignedTo.department}">Role</div>
+                            </div>
+                            <div th:unless="${ticket.assignedTo != null}" class="text-muted fst-italic small">
+                                A support specialist will be assigned shortly.
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Activity Audit Trail for transparency -->
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3">
+                    <h6 class="mb-0 fw-bold"><i class="bi bi-clock-history text-primary me-2"></i>Status History &amp; Updates</h6>
+                </div>
+                <div class="card-body p-4">
+                    <ul class="timeline">
+                        <li class="timeline-item" th:each="act : ${ticket.activities}">
+                            <div class="timeline-marker"
+                                 th:classappend="${act.action == 'CREATED' ? 'success' : (act.action == 'STATUS_CHANGED' ? 'danger' : '')}"></div>
+                            <div class="d-flex justify-content-between align-items-baseline">
+                                <span class="fw-bold text-dark small" th:text="${act.action}">ACTION</span>
+                                <span class="text-muted small" th:text="${#temporals.format(act.timestamp, 'dd MMM yyyy, HH:mm')}">Time</span>
+                            </div>
+                            <p class="mb-0 text-secondary small" th:text="${act.description}">Description</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="text-center mb-5">
+                <a th:href="@{'/tickets/' + ${ticket.id}}" class="btn btn-outline-primary btn-sm me-2">
+                    <i class="bi bi-shield-lock me-1"></i> Open in Agent Portal
+                </a>
+                <a th:href="@{/dashboard}" class="btn btn-secondary btn-sm">
+                    <i class="bi bi-speedometer2 me-1"></i> Go to Dashboard
+                </a>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

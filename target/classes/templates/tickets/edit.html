@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: layout(~{::title}, ~{::#main-content})}">
+<head>
+    <title th:text="'Edit Ticket ' + ${ticketDto.ticketId}">Edit Ticket</title>
+</head>
+<body>
+<div id="main-content">
+
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb mb-1 small">
+                    <li class="breadcrumb-item"><a th:href="@{/dashboard}">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{/tickets}">Tickets</a></li>
+                    <li class="breadcrumb-item"><a th:href="@{'/tickets/' + ${ticketDto.id}}" th:text="${ticketDto.ticketId}">TKT-1001</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Edit</li>
+                </ol>
+            </nav>
+            <h2 class="h3 fw-bold mb-0">Edit Ticket <span class="text-primary" th:text="${ticketDto.ticketId}"></span></h2>
+        </div>
+        <a th:href="@{'/tickets/' + ${ticketDto.id}}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Back to Detail
+        </a>
+    </div>
+
+    <!-- Form -->
+    <form th:action="@{'/tickets/' + ${ticketDto.id} + '/edit'}" th:object="${ticketDto}" method="post">
+        <input type="hidden" th:field="*{ticketId}">
+        <input type="hidden" th:field="*{id}">
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3">
+                <h6 class="mb-0 fw-bold">Update Ticket Properties</h6>
+            </div>
+            <div class="card-body p-4">
+                
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Subject / Title <span class="text-danger">*</span></label>
+                    <input type="text" th:field="*{title}" class="form-control" th:errorclass="is-invalid">
+                    <div class="invalid-feedback" th:errors="*{title}"></div>
+                </div>
+
+                <div class="row g-3 mb-3">
+                    <div class="col-12 col-md-3">
+                        <label class="form-label fw-semibold">Category <span class="text-danger">*</span></label>
+                        <select th:field="*{category}" class="form-select">
+                            <option th:each="cat : ${allCategories}" th:value="${cat}" th:text="${cat.displayName}"></option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-md-3">
+                        <label class="form-label fw-semibold">Priority <span class="text-danger">*</span></label>
+                        <select th:field="*{priority}" class="form-select">
+                            <option th:each="pr : ${allPriorities}" th:value="${pr}" th:text="${pr.displayName}"></option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-md-3">
+                        <label class="form-label fw-semibold">Status <span class="text-danger">*</span></label>
+                        <select th:field="*{status}" class="form-select">
+                            <option th:each="st : ${allStatuses}" th:value="${st}" th:text="${st.displayName}"></option>
+                        </select>
+                    </div>
+
+                    <div class="col-12 col-md-3">
+                        <label class="form-label fw-semibold">Assigned Agent</label>
+                        <select th:field="*{assignedEmployeeId}" class="form-select">
+                            <option value="">-- Unassigned --</option>
+                            <option th:each="emp : ${employees}" th:value="${emp.id}"
+                                    th:text="${emp.fullName} + ' (' + ${emp.role} + ')'"></option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Issue Description <span class="text-danger">*</span></label>
+                    <textarea th:field="*{description}" rows="6" class="form-control" th:errorclass="is-invalid"></textarea>
+                    <div class="invalid-feedback" th:errors="*{description}"></div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Resolution Notes</label>
+                    <textarea th:field="*{resolutionNotes}" rows="4" class="form-control"
+                              placeholder="Document resolution steps, root cause analysis, or troubleshooting notes..."></textarea>
+                </div>
+
+                <div class="d-flex justify-content-end gap-2">
+                    <a th:href="@{'/tickets/' + ${ticketDto.id}}" class="btn btn-outline-secondary px-4">Cancel</a>
+                    <button type="submit" class="btn btn-primary px-4 shadow-sm">Save Changes</button>
+                </div>
+
+            </div>
+        </div>
+    </form>
+
+</div>
+</body>
+</html>
